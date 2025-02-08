@@ -56,6 +56,11 @@ Para rodar o projeto, use:
 python -m main
 ```
 
+## **Test**
+
+```sh
+python -m pytest -s tests/test_google_search.py
+```
 
 ---
 
