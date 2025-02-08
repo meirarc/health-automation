@@ -2,7 +2,6 @@
 
 ## Repository Structure:
 - [ ] Create a .gitignore file.
-- [ ] Add Topic apm-0062689.
 
 ## Documentation:
 - [ ] Add README.md.
