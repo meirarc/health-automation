@@ -1,0 +1,23 @@
+analyze_supplements:
+  description: >
+    Extract supplement intake data from Notion and analyze for interactions,
+    dosage optimization, and scheduling improvements.
+  expected_output: >
+    A summary of findings with recommendations for better intake timing and combinations.
+  agent: analysis_agent
+
+research_supplements:
+  description: >
+    Search for new research on supplement interactions and effectiveness.
+    Find cost-effective brands that reduce capsule count and provide better combinations.
+  expected_output: >
+    A curated list of scientific insights and optimized supplement purchase options.
+  agent: research_agent
+
+generate_health_report:
+  description: >
+    Format a detailed health report combining supplement analysis and research findings.
+    Email the report in a well-structured format.
+  expected_output: >
+    An email sent to the user with a summary of supplement intake improvements and purchase suggestions.
+  agent: report_agent
