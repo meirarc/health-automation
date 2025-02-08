@@ -25,7 +25,7 @@ def get_gmail_service():
 
     return build("gmail", "v1", credentials=creds)
 
-@tool("send_health_report")  # Apenas o nome da ferramenta, sem `return_direct`
+@tool("send_health_report_tool")  # Apenas o nome da ferramenta, sem `return_direct`
 def send_health_report_tool(subject: str, body: str, recipient: str) -> str:
     """Envia um e-mail formatado usando Gmail API e OAuth2."""
     try:
