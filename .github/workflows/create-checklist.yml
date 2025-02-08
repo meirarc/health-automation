@@ -6,6 +6,10 @@ on:
       - .github/ISSUE_TEMPLATE/checklist.md
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write  # ✅ Permite criar issues no repositório
+
 jobs:
   create_issue:
     runs-on: ubuntu-latest
@@ -28,7 +32,7 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const content = process.env.content;
-          github.rest.issues.create({
+          await github.rest.issues.create({
             owner: context.repo.owner,
             repo: context.repo.repo,
             title: "Repository Setup Checklist",
