@@ -1,0 +1,41 @@
+name: Create Checklist Issue 
+
+on:
+  push:
+    paths:
+      - .github/ISSUE_TEMPLATE/checklist.md
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write  # ✅ Permite criar issues no repositório
+
+jobs:
+  create_issue:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Read Checklist Content
+      id: read_checklist
+      run: |
+        content=$(cat .github/ISSUE_TEMPLATE/checklist.md)
+        echo "content<<EOF" >> $GITHUB_ENV
+        echo "$content" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
+    - name: Create Checklist Issue
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          const content = process.env.content;
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: "Repository Setup Checklist",
+            body: content,
+            labels: ["checklist"]
+          });

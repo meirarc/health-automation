@@ -1,0 +1,39 @@
+name: Bug report
+description: Create a Bug Issue to the Repository
+labels: ["bug"]
+body:
+- type: textarea
+  id: bug_description
+  attributes:
+    label: Describe the Bug
+    description: |
+      A clear and concise description of what the bug is.
+  validations:
+    required: true
+- type: textarea
+  id: steps_to_reproduce
+  attributes:
+    label: Steps to Reproduce
+    description: |
+      Steps to reproduce the error, for instance: 
+      1. Go to '...'
+      2. Click on '....'
+      3. Scroll down to '....'
+  validations:
+    required: false
+- type: textarea
+  id: expcted_result
+  attributes:
+    label: Expected Behavior
+    description: |
+      A clear and concise description of what you expected to happen.
+  validations:
+    required: true
+- type: textarea
+  id: additional_information
+  attributes:
+    label: Additional Context
+    description: |
+      Add any other context about the problem here.
+  validations:
+    required: false
