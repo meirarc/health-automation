@@ -1,23 +1,55 @@
-analyze_supplements:
+analyze_supplementation:
   description: >
-    Extract supplement intake data from Notion and analyze for interactions,
-    dosage optimization, and scheduling improvements.
+    Analise a tabela de suplementação do Notion e verifique:
+    - Se há interações negativas entre suplementos e medicamentos.
+    - Se a ingestão está alinhada com recomendações científicas.
+    - Se há sugestões para melhorar a rotina de suplementação.
+
   expected_output: >
-    A summary of findings with recommendations for better intake timing and combinations.
+    Um relatório estruturado com:
+    - Lista de suplementos e medicamentos analisados.
+    - Possíveis interações negativas.
+    - Sugestões de ajustes na rotina de consumo.
+    - Reforço sobre quais suplementos são essenciais.
+
+  tools: 
+    - fetch_notion_supplements
   agent: analysis_agent
 
-research_supplements:
+
+research_best_supplements:
   description: >
-    Search for new research on supplement interactions and effectiveness.
-    Find cost-effective brands that reduce capsule count and provide better combinations.
+    Pesquise por suplementos de melhor qualidade e custo-benefício, considerando:
+    - Opções que combinem múltiplas vitaminas em um só produto.
+    - Redução na quantidade de cápsulas ingeridas.
+    - Comparação de preços e marcas confiáveis.
+  
   expected_output: >
-    A curated list of scientific insights and optimized supplement purchase options.
+    Uma lista estruturada com:
+    - Suplementos recomendados com base em qualidade e custo.
+    - Opções que reduzem a quantidade de cápsulas.
+    - Links para compra dos produtos recomendados.
+
+  tools: 
+    - search_pubmed
+    - search_best_supplements
   agent: research_agent
 
-generate_health_report:
+
+send_supplementation_report:
   description: >
-    Format a detailed health report combining supplement analysis and research findings.
-    Email the report in a well-structured format.
+    Envie um e-mail com um relatório estruturado contendo:
+    - A análise do `Analysis Agent` sobre a suplementação.
+    - A pesquisa do `Research Agent` sobre melhores suplementos e preços.
+    - Sugestões de ajustes na rotina de ingestão.
+    - Opções de compra e links para os suplementos recomendados.
+
   expected_output: >
-    An email sent to the user with a summary of supplement intake improvements and purchase suggestions.
-  agent: report_agent
+    Um e-mail bem formatado, contendo:
+    - A análise detalhada da combinação de suplementos.
+    - Recomendações de suplementos mais eficientes e econômicos.
+    - Links confiáveis para compra dos produtos.
+
+  tools: 
+    - send_health_report_tool
+  agent: email_agent
