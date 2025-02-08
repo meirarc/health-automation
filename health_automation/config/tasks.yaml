@@ -16,7 +16,6 @@ analyze_supplementation:
     - fetch_notion_supplements
   agent: analysis_agent
 
-
 research_best_supplements:
   description: >
     Pesquise por suplementos de melhor qualidade e custo-benefício, considerando:
@@ -34,7 +33,6 @@ research_best_supplements:
     - search_pubmed
     - search_best_supplements
   agent: research_agent
-
 
 send_supplementation_report:
   description: >

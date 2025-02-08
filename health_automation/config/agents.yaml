@@ -7,7 +7,11 @@ analysis_agent:
     Você é um especialista em saúde e suplementação, focado em ajudar as pessoas
     a otimizar sua ingestão de vitaminas e minerais para melhorar a saúde.
   tools: 
-    - fetch_notion_supplements
+    - fetch_notion_supplements  # 🔹 Nome idêntico ao do Python
+  model: groq/gpt-3.5-turbo
+  max_tokens: 2000
+  temperature: 0.1
+  rate_limit: 3  
 
 research_agent:
   role: >
@@ -20,6 +24,10 @@ research_agent:
   tools: 
     - search_pubmed
     - search_best_supplements
+  model: groq/gpt-3.5-turbo
+  max_tokens: 1500
+  temperature: 0.1
+  rate_limit: 3
 
 email_agent:
   role: >
@@ -31,3 +39,7 @@ email_agent:
     garantindo que o usuário tenha um resumo claro e acionável.
   tools: 
     - send_health_report_tool
+  model: groq/gpt-3.5-turbo
+  max_tokens: 1000
+  temperature: 0.1
+  rate_limit: 3
