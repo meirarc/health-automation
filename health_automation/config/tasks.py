@@ -7,7 +7,7 @@ from health_automation.tools.email_tool import send_health_report_tool
 
 from health_automation.config.agents import analysis_agent, research_agent, email_agent  # Importa os agentes
 
-from health_automation.checkpoint_manager import get_checkpoint, save_checkpoint
+from health_automation.llm_setup.checkpoint_manager import get_checkpoint, save_checkpoint
 
 
 def create_task(name, description, expected_output, agent, tools=[]):

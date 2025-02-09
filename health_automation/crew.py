@@ -1,10 +1,11 @@
 import time
 
-from health_automation.config import groq_setup
 from crewai import Crew, Process
 from health_automation.config.agents import agents
 from health_automation.config.tasks import tasks
-from health_automation.checkpoint_manager import save_checkpoint
+from health_automation.llm_setup.checkpoint_manager import save_checkpoint
+from health_automation.llm_setup import groq_setup
+
 
 import os
 

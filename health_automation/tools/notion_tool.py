@@ -3,7 +3,7 @@ import json
 import requests
 from crewai.tools import tool
 
-# Carrega credenciais do Notion
+# 🔹 Carrega credenciais do Notion
 def load_notion_credentials():
     certs_path = os.path.join("certs", "notion.json")
     with open(certs_path, "r") as file:
@@ -23,43 +23,26 @@ HEADERS = {
 
 @tool("fetch_notion_supplements_tool")
 def fetch_notion_supplements() -> str:
-    """Busca a lista de suplementos e medicamentos registrados no Notion."""
+    """Busca TODOS os suplementos no Notion e retorna apenas Nome e Dosagem."""
     try:
         response = requests.post(NOTION_URL, headers=HEADERS)
         response.raise_for_status()
         data = response.json()
 
         supplements = []
-        for result in data["results"]:
+        for result in data.get("results", []):  # 🔹 Retorna TODOS os suplementos
             properties = result.get("properties", {})
 
             def get_text_value(prop, field_type):
                 """Função auxiliar para evitar erros ao acessar campos do Notion."""
                 return prop.get(field_type, [{}])[0].get("text", {}).get("content", "Não informado") if prop.get(field_type) else "Não informado"
 
-            def get_select_value(prop):
-                """Função auxiliar para campos de seleção."""
-                return prop.get("select", {}).get("name", "Não informado") if prop.get("select") else "Não informado"
-
             nome = get_text_value(properties.get("Name", {}), "title")
             dosagem = get_text_value(properties.get("recommendation", {}), "rich_text")
-            beneficios = get_text_value(properties.get("benefits", {}), "rich_text")
-            responsavel = get_select_value(properties.get("person", {}))
-            periodo = get_select_value(properties.get("time", {}))
-            preco = properties.get("avg. cost", {}).get("number", "Não informado")
-            quantidade_embalagem = properties.get("pack", {}).get("number", "Não informado")
-            marca = get_text_value(properties.get("brand", {}), "rich_text")
-            proximo_reabastecimento = properties.get("next shop", {}).get("date", {}).get("start", "Não informado")
 
-            supplements.append(
-                f"{nome} ({dosagem}) - {beneficios}\n"
-                f"Tomado por: {responsavel} - Período: {periodo}\n"
-                f"Marca: {marca} - Embalagem: {quantidade_embalagem} unidades\n"
-                f"Preço médio: ${preco} - Próximo reabastecimento: {proximo_reabastecimento}\n"
-                "--------------------------"
-            )
+            supplements.append(f"{nome} - {dosagem}")
 
-        return "\n".join(supplements) if supplements else "Nenhum suplemento encontrado no Notion."
+        return "\n".join(supplements) if supplements else "Nenhum suplemento encontrado."
     
     except requests.exceptions.RequestException as e:
         return f"Erro ao acessar o Notion API: {str(e)}"

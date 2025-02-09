@@ -5,7 +5,7 @@ from health_automation.tools.pubmed_tool import search_pubmed
 from health_automation.tools.google_search_tool import search_best_supplements
 from health_automation.tools.email_tool import send_health_report_tool
 
-from health_automation.config.rate_limiter import rate_limiter
+from health_automation.llm_setup.rate_limiter import rate_limiter
 
 def rate_limited_llm(model="groq/mixtral-8x7b-32768", max_tokens=1000, temperature=0.1, timeout=120, frequency_penalty=0.1):
     rate_limiter.wait_for_tokens(max_tokens)  # 🔹 Wait before making the API call
@@ -59,10 +59,7 @@ email_agent = create_agent(
         "Você é um assistente responsável por comunicar as análises e recomendações da equipe, "
         "garantindo que o usuário tenha um resumo claro e acionável."
     ),
-    tools=[send_health_report_tool],
-    llm=rate_limited_llm(),
-    max_iter=3,
-    verbose=True
+    tools=[send_health_report_tool]
 )
 
 # 🔹 Lista de Agentes para Importação Fácil
