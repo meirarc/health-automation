@@ -1,82 +1,50 @@
-from crewai import Agent, Crew, Process
-from crewai.project import CrewBase, agent, task, crew
-from health_automation.tools.notion_tool import fetch_notion_supplements
-from health_automation.tools.pubmed_tool import search_pubmed
-from health_automation.tools.google_search_tool import search_best_supplements
-from health_automation.tools.email_tool import send_health_report_tool
+import time
 
-@CrewBase
-class HealthAutomationCrew:
-    """Configuração da CrewAI para automação da suplementação."""
+from health_automation.config import groq_setup
+from crewai import Crew, Process
+from health_automation.config.agents import analysis_agent, research_agent, email_agent
+from health_automation.config.tasks import tasks
+from health_automation.checkpoint_manager import save_checkpoint
 
-    agents_config = "config/agents.yaml"
-    tasks_config = "config/tasks.yaml"
+import os
 
-    # Criando Agentes (nomes iguais ao exemplo)
-    @agent
-    def analysis_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config["analysis_agent"],
-            verbose=True,
-            #tools=[fetch_notion_supplements]  # ⬅️ Adicionando a ferramenta diretamente no agente
-        )
+CHECKPOINT_FILE = "task_checkpoints.json"
 
-    @agent
-    def research_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config["research_agent"],
-            verbose=True,
-            tools=[search_pubmed, search_best_supplements]  # ⬅️ Garantindo ferramentas registradas corretamente
-        )
+# 🔹 Apaga o arquivo JSON para recomeçar do zero
+if os.path.exists(CHECKPOINT_FILE):
+    os.remove(CHECKPOINT_FILE)
+    print("🗑️ Checkpoints resetados. Rodando do zero!")
 
-    @agent
-    def report_agent(self) -> Agent:
-        return Agent(
-            config=self.agents_config["email_agent"],
-            verbose=True,
-            tools=[send_health_report_tool]  # ⬅️ Registrando ferramenta corretamente
-        )
+def create_crew():
+    return Crew(
+        agents=[analysis_agent, research_agent, email_agent],
+        tasks=tasks,
+        process=Process.sequential
+    )
 
-    # Criando Tarefas (nomes iguais ao exemplo)
-    @task
-    def analyze_supplements_task(self):
-        return {
-            "config": self.tasks_config["analyze_supplementation"],
-            "agent": self.analysis_agent(),
-            #"tools": [fetch_notion_supplements]  # ⬅️ Garantindo que a ferramenta é passada para a task
-        }
-
-    @task
-    def research_supplements_task(self):
-        return {
-            "config": self.tasks_config["research_best_supplements"],
-            "agent": self.research_agent(),
-            "tools": [search_pubmed, search_best_supplements]  # ⬅️ Garantindo ferramentas registradas
-        }
-
-    @task
-    def generate_health_report_task(self):
-        return {
-            "config": self.tasks_config["send_supplementation_report"],
-            "agent": self.report_agent(),
-            "tools": [send_health_report_tool]  # ⬅️ Garantindo ferramenta para envio de relatório
-        }
-
-    # Criando a Crew
-    @crew
-    def health_crew(self) -> Crew:
-        return Crew(
-            agents=[self.analysis_agent(), self.research_agent(), self.report_agent()],
-            tasks=[
-                self.analyze_supplements_task(),
-                self.research_supplements_task(),
-                self.generate_health_report_task()
-            ],
-            process=Process.sequential  # Executa os agentes em sequência
-        )
-
-# Executar a Crew
 if __name__ == "__main__":
-    crew_instance = HealthAutomationCrew()
-    result = crew_instance.health_crew().kickoff()
-    print(result)
+    print("🚀 Starting CrewAI process...\n")
+    crew = create_crew()
+
+    retry_attempts = 5  # 🔹 Tentativas antes de falhar completamente
+
+    for attempt in range(retry_attempts):
+        try:
+            for task in tasks:
+                print(f"⚡ Executando tarefa: {task.description[:30]}...")  # Exibir início da descrição
+                
+                result = task.execute_sync()  # 🔹 Executa a tarefa diretamente
+                save_checkpoint(task.description, result)  # 🔹 Salva progresso corretamente
+                
+                print(f"✅ Tarefa '{task.description[:30]}...' concluída!\n")
+            
+            print("\n🎉 Todas as tarefas foram concluídas com sucesso!")
+            break  # Sai do loop se tudo der certo
+        except Exception as e:
+            if "rate_limit_exceeded" in str(e):
+                wait_time = 10 + (attempt * 5)  # 🔹 Espera crescente (10s → 15s → 20s...)
+                print(f"⚠️ Rate limit atingido. Esperando {wait_time}s antes de tentar novamente...")
+                time.sleep(wait_time)
+            else:
+                print("❌ Erro inesperado:", e)
+                break  # Sai se não for erro de limite de taxa

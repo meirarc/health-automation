@@ -8,4 +8,5 @@ def load_groq_credentials():
         return json.load(file)
 
 groq_creds = load_groq_credentials()
-os.environ["GROQ_API_KEY"] = groq_creds["GROQ_API_KEY"]  # Define a chave no ambiente
+os.environ["GROQ_API_KEY"] = groq_creds["GROQ_API_KEY"]
+

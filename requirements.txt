@@ -1,7 +1,16 @@
-crewai
+
+# General dependencies
+requests
+
+# Google dependencies
 google-auth
 google-auth-oauthlib
 google-auth-httplib2
 google-api-python-client
-requests
+
+# CrewAI dependencies
+crewai
 crewai_tools
+
+# OpenAI dependencies
+openai
