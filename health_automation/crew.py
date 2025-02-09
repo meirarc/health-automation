@@ -18,7 +18,7 @@ class HealthAutomationCrew:
         return Agent(
             config=self.agents_config["analysis_agent"],
             verbose=True,
-            tools=[fetch_notion_supplements]  # ⬅️ Adicionando a ferramenta diretamente no agente
+            #tools=[fetch_notion_supplements]  # ⬅️ Adicionando a ferramenta diretamente no agente
         )
 
     @agent
@@ -43,7 +43,7 @@ class HealthAutomationCrew:
         return {
             "config": self.tasks_config["analyze_supplementation"],
             "agent": self.analysis_agent(),
-            "tools": [fetch_notion_supplements]  # ⬅️ Garantindo que a ferramenta é passada para a task
+            #"tools": [fetch_notion_supplements]  # ⬅️ Garantindo que a ferramenta é passada para a task
         }
 
     @task

@@ -13,7 +13,7 @@ analyze_supplementation:
     - Reforço sobre quais suplementos são essenciais.
 
   tools: 
-    - fetch_notion_supplements
+    - fetch_notion_supplements_tool
   agent: analysis_agent
 
 research_best_supplements:

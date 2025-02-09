@@ -21,7 +21,7 @@ HEADERS = {
     "Notion-Version": "2022-06-28"
 }
 
-@tool("fetch_notion_supplements")
+@tool("fetch_notion_supplements_tool")
 def fetch_notion_supplements() -> str:
     """Busca a lista de suplementos e medicamentos registrados no Notion."""
     try:
