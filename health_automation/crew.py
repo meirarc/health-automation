@@ -2,7 +2,7 @@ import time
 
 from health_automation.config import groq_setup
 from crewai import Crew, Process
-from health_automation.config.agents import analysis_agent, research_agent, email_agent
+from health_automation.config.agents import agents
 from health_automation.config.tasks import tasks
 from health_automation.checkpoint_manager import save_checkpoint
 
@@ -17,7 +17,7 @@ if os.path.exists(CHECKPOINT_FILE):
 
 def create_crew():
     return Crew(
-        agents=[analysis_agent, research_agent, email_agent],
+        agents=agents,
         tasks=tasks,
         process=Process.sequential
     )

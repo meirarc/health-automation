@@ -11,38 +11,48 @@ def rate_limited_llm(model="groq/mixtral-8x7b-32768", max_tokens=1000, temperatu
     rate_limiter.wait_for_tokens(max_tokens)  # 🔹 Wait before making the API call
     return LLM(model=model, max_tokens=max_tokens, temperature=temperature, timeout=timeout, frequency_penalty=frequency_penalty)
 
-
+def create_agent(name, role, goal, backstory, tools):
+    """
+    Cria um agente com os parâmetros fornecidos.
+    """
+    print(f"⚡ Criando agente: {role}...")  # 🔹 Log para depuração
+    return Agent(
+        role=role,
+        goal=goal,
+        backstory=backstory,
+        tools=tools,
+        llm=rate_limited_llm(),  # 🔹 Usa o modelo limitado
+        max_iter=3,
+        verbose=True
+    )
 
 # 🔹 Agente de Análise de Suplementação
-analysis_agent = Agent(
+analysis_agent = create_agent(
+    "analysis_agent",
     role="Especialista em análise de suplementação",
     goal="Verificar se a combinação de suplementos e medicamentos está adequada.",
     backstory=(
         "Você é um especialista em saúde e suplementação, focado em ajudar as pessoas "
         "a otimizar sua ingestão de vitaminas e minerais para melhorar a saúde."
     ),
-    tools=[fetch_notion_supplements],
-    llm=rate_limited_llm(),
-    max_iter=3,
-    verbose=True
+    tools=[fetch_notion_supplements]
 )
 
 # 🔹 Agente Pesquisador de Suplementos
-research_agent = Agent(
+research_agent = create_agent(
+    "research_agent",
     role="Pesquisador de suplementos e estudos científicos",
     goal="Buscar evidências científicas sobre suplementação e encontrar produtos de melhor qualidade e custo-benefício.",
     backstory=(
         "Você é um pesquisador especializado em suplementação, com acesso a bases científicas "
         "e ferramentas de busca para encontrar as melhores opções de vitaminas e minerais."
     ),
-    tools=[search_pubmed, search_best_supplements],
-    llm=rate_limited_llm(),
-    max_iter=3,
-    verbose=True
+    tools=[search_pubmed, search_best_supplements]
 )
 
 # 🔹 Agente de Comunicação por E-mail
-email_agent = Agent(
+email_agent = create_agent(
+    "email_agent",
     role="Assistente de comunicação por e-mail",
     goal="Enviar relatórios bem estruturados com análises e recomendações sobre suplementação.",
     backstory=(
