@@ -10,8 +10,7 @@ import json
 from health_automation.tools.notion_tool import fetch_notion_user_data
 from health_automation.tools.generate_gmail_token import generate_token
 
-TOKEN_FILE = os.path.join("certs", "gmail_token.pickle")
-
+TOKEN_FILE = "certs/gmail_token.pickle"
 
 def get_gmail_service():
     """Carrega o token OAuth2 e retorna o serviço Gmail API autenticado."""
