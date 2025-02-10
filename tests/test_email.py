@@ -1,21 +1,14 @@
-import sys
-import os
 import pytest
-
-# Adiciona o diretório raiz do projeto ao sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from health_automation.tools.email_tool import send_health_report_tool
+from health_automation.tools.email_tool import send_email_tool
 
 @pytest.mark.email
-def test_send_health_report():
-    """Testa se o envio de e-mail via CrewAI Tools funciona corretamente."""
+def test_send_email_tool():
+    """Testa a ferramenta de envio de email via CrewAI Tools."""
     print("🚀 Testando envio de e-mail...")
 
-    resultado = send_health_report_tool.run(
-        subject="🚀 Teste CrewAI - Suplementação",
-        body="<h1>Seu relatório de suplementos</h1><p>Isso é um teste de envio de e-mail via CrewAI!</p>",
-        recipient="meirarc@gmail.com"
+    resultado = send_email_tool.run(
+        subject="🚀 Teste CrewAI - Email Markdown",
+        body_markdown="# Teste de Envio\n\nIsso é um **teste** de envio de e-mail via CrewAI!\n\n- Item 1\n- Item 2"
     )
 
     print(resultado)

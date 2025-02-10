@@ -1,24 +1,16 @@
-from crewai import Agent, LLM
+from crewai import Agent
 
-from health_automation.tools.notion_tool import fetch_notion_supplements
+from health_automation.tools.notion_tool import fetch_notion_user_data, fetch_notion_supplements
 from health_automation.tools.pubmed_tool import search_pubmed, summarize_pubmed_results
-from health_automation.tools.google_search_tool import search_supplements_in_spain
-from health_automation.tools.email_tool import send_health_report_tool
+from health_automation.tools.email_tool import send_email_tool
+from health_automation.tools.google_search_tool import search_supplements_in_spain, fetch_recommended_dosages
+from health_automation.tools.shopping_tool import search_supplement_products
 
+from health_automation.llm_setup.groq_setup import groq_setup
 
-# 🔹 Criamos um único LLM compartilhado entre todos os agentes
-def create_llm():
-    return LLM(
-        model="groq/gemma2-9b-it",
-        max_tokens=2500,  # 🔹 Permitimos mais tokens, já que agora temos controle melhorado
-        temperature=0.3,
-        timeout=120,
-        frequency_penalty=0.6
-    )
+llm=groq_setup()
 
-
-
-def create_agent(role="", goal="", backstory="", tools=[], function_call=None):
+def create_agent(role="", goal="", backstory="", tools=[], function_call=None, max_rpm=3):
     """
     Cria um agente com os parâmetros fornecidos.
     """
@@ -28,44 +20,46 @@ def create_agent(role="", goal="", backstory="", tools=[], function_call=None):
         goal=goal,
         backstory=backstory,
         tools=tools,
-        llm=create_llm(),  # 🔹 Usa o modelo limitado
+        llm=llm, 
+        function_call=function_call,
         verbose=True,
-        max_rpm=4,
-        function_call=function_call
+        max_rpm=max_rpm
+
     )
 
-# 🔹 Agente de Análise de Suplementação
-extractor_agent = create_agent(
-    role="Especialista em Extração de Dados",
-    goal="Coletar informações detalhadas sobre os suplementos no Notion e validar as recomendações diárias.",
-    backstory="Você é um especialista em organização e coleta de dados estruturados.",
-    tools=[fetch_notion_supplements, search_supplements_in_spain],
-    function_call=lambda supplement: search_supplements_in_spain(supplement["name"])
+notion_manager = create_agent(
+    role="Gerenciador de Notion",
+    goal="Extrair e organizar os dados do usuário no Notion",
+    backstory="Você é um assistente especializado em coletar e organizar dados do Notion para análise de saúde.",
+    tools=[fetch_notion_user_data, fetch_notion_supplements]
 )
 
-nutrition_agent = create_agent(
-    role="Nutricionista Especialista em Suplementação",
-    goal="Analisar a combinação e horários dos suplementos para garantir eficácia, utilizando o mínimo de palavras possíveis.",
-    backstory="Você é um nutricionista especializado em suplementação e otimização da saúde.",
+# 🔹 Agente Pesquisador Científico
+health_researcher = create_agent(
+    role="Pesquisador de Saúde",
+    goal="Buscar artigos científicos sobre os suplementos e gerar um resumo.",
+    backstory="Você é um pesquisador que analisa estudos científicos para determinar a eficácia e segurança dos suplementos.",
+    tools=[search_pubmed, summarize_pubmed_results, send_email_tool]
 )
 
-
-# 🔹 Agente Pesquisador de Suplementos
-research_agent = create_agent(
-    role="Pesquisador Científico",
-    goal="Buscar evidências científicas atualizadas sobre suplementação e gerar um resumo curto.",
-    backstory="Você é um cientista dedicado a encontrar as melhores evidências científicas sobre suplementação.",
-    tools=[search_pubmed],
-    function_call=lambda response: summarize_pubmed_results(response) 
+# 🔹 Agente Assistente de Compras
+shopping_assistant = create_agent(
+    role="Assistente de Compras",
+    goal="Encontrar os melhores suplementos na internet para o usuário",
+    backstory="Você é um assistente especializado em encontrar suplementos confiáveis e recomendados para compra.",
+    tools=[search_supplement_products, search_supplements_in_spain, send_email_tool]  # 🔹 Agora tem as duas ferramentas!
 )
 
-# 🔹 Agente de Comunicação por E-mail
-report_agent = create_agent(
-    role="Gerador de Relatórios",
-    goal="Compilar todas as informações e enviar um relatório bem formatado.",
-    backstory="Você é um especialista em relatórios e comunicação clara. Seu objetivo é entregar informações bem estruturadas.",
-    tools=[send_health_report_tool]
+# 🔹 Novo Agente: Especialista em Dosagem
+dosage_specialist = create_agent(
+    role="Especialista em Dosagem",
+    goal="Determinar a dosagem ideal de suplementos com base na condição de saúde do usuário.",
+    backstory=(
+        "Você é um especialista em suplementação e recomendações personalizadas. "
+        "Seu objetivo é garantir que o usuário tome os suplementos na dosagem correta para seu perfil de saúde."
+    ),
+    tools=[fetch_recommended_dosages, send_email_tool]  # 🔹 Ferramentas para busca e envio
 )
 
-# 🔹 Lista de Agentes para Importação Fácil
-agents = [extractor_agent,nutrition_agent, research_agent, report_agent]
+# 🔹 Lista de Agentes
+agents = [notion_manager, health_researcher, shopping_assistant, dosage_specialist]
