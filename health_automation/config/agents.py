@@ -3,7 +3,7 @@ from crewai import Agent
 from health_automation.tools.notion_tool import fetch_notion_user_data, fetch_notion_supplements
 from health_automation.tools.pubmed_tool import search_pubmed, summarize_pubmed_results
 from health_automation.tools.email_tool import send_email_tool
-from health_automation.tools.google_search_tool import search_supplements_in_spain
+from health_automation.tools.google_search_tool import search_supplements_in_spain, fetch_recommended_dosages
 from health_automation.tools.shopping_tool import search_supplement_products
 
 from health_automation.llm_setup.groq_setup import groq_setup
@@ -50,5 +50,16 @@ shopping_assistant = create_agent(
     tools=[search_supplement_products, search_supplements_in_spain, send_email_tool]  # 🔹 Agora tem as duas ferramentas!
 )
 
+# 🔹 Novo Agente: Especialista em Dosagem
+dosage_specialist = create_agent(
+    role="Especialista em Dosagem",
+    goal="Determinar a dosagem ideal de suplementos com base na condição de saúde do usuário.",
+    backstory=(
+        "Você é um especialista em suplementação e recomendações personalizadas. "
+        "Seu objetivo é garantir que o usuário tome os suplementos na dosagem correta para seu perfil de saúde."
+    ),
+    tools=[fetch_recommended_dosages, send_email_tool]  # 🔹 Ferramentas para busca e envio
+)
+
 # 🔹 Lista de Agentes
-agents = [notion_manager, health_researcher, shopping_assistant]
+agents = [notion_manager, health_researcher, shopping_assistant, dosage_specialist]

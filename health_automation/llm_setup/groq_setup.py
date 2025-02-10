@@ -11,7 +11,7 @@ def load_groq_credentials():
         return json.load(file)
     
 
-def groq_setup(model="groq/gemma2-9b-it", max_tokens=2500, temperature=0.3, timeout=120, frequency_penalty=0.6):
+def groq_setup(model="groq/gemma2-9b-it", max_tokens=2000, temperature=0.3, timeout=120, frequency_penalty=0.6):
     """Configura o LLM do Groq com limites seguros."""
     return LLM(
         model=model,

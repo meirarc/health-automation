@@ -56,3 +56,39 @@ def search_supplements_in_spain(query: str, max_results: int = 5) -> str:
 
     except Exception as e:
         return json.dumps({"error": f"Erro ao buscar suplementos: {str(e)}"}, ensure_ascii=False)
+
+@tool("fetch_recommended_dosages")
+def fetch_recommended_dosages(supplement_name: str, health_condition: str) -> str:
+    """
+    Busca dosagens recomendadas para um suplemento levando em conta a condição de saúde do usuário.
+
+    Parâmetros:
+    - supplement_name: Nome do suplemento (ex: "Vitamina D 5000 IU").
+    - health_condition: Condição de saúde do usuário (ex: "Diabetes tipo 2").
+
+    Retorna:
+    - JSON com a dosagem recomendada e referência acadêmica.
+    """
+    try:
+        search_query = f"dosagem recomendada de {supplement_name} para {health_condition} site:nih.gov OR site:mayoclinic.org OR site:pubmed.ncbi.nlm.nih.gov"
+        
+        raw_results = search_best_supplements.run(query=search_query, gl="es", num=5)
+
+        results = json.loads(raw_results) if isinstance(raw_results, str) else raw_results
+
+        if "organic" not in results or not results["organic"]:
+            return json.dumps({"error": f"Nenhuma informação de dosagem encontrada para '{supplement_name}' com {health_condition}."}, ensure_ascii=False)
+
+        dosage_info = [
+            {
+                "title": item.get("title", "Título não disponível"),
+                "link": item.get("link", "Sem link"),
+                "description": item.get("snippet", "Descrição não disponível")
+            }
+            for item in results["organic"]
+        ]
+
+        return json.dumps(dosage_info[:3], indent=2, ensure_ascii=False) if dosage_info else json.dumps({"error": "Nenhuma informação encontrada."})
+
+    except Exception as e:
+        return json.dumps({"error": f"Erro ao buscar dosagem: {str(e)}"}, ensure_ascii=False)
