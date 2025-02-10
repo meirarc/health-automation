@@ -12,6 +12,4 @@ markdown2
 # CrewAI dependencies
 crewai
 crewai_tools
-
-# OpenAI dependencies
-openai
+crewai[tools]
