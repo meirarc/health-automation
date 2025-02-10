@@ -6,6 +6,9 @@ from email.mime.text import MIMEText
 from googleapiclient.discovery import build
 import pickle
 import base64
+import json
+from health_automation.tools.notion_tool import fetch_notion_user_data
+from health_automation.tools.generate_gmail_token import generate_token  
 
 TOKEN_FILE = os.path.join("certs", "gmail_token.pickle")
 
@@ -17,48 +20,72 @@ def get_gmail_service():
             creds = pickle.load(token)
 
     if not creds or not creds.valid:
-        raise Exception("⚠️ Token inválido. Rode 'generate_gmail_token.py' novamente.")
+        print("⚠️ Token inválido ou expirado. Gerando um novo...")
+
+        generate_token()  # 🔹 Gera um novo token automaticamente
+
+        # 🔹 Recarrega o novo token gerado
+        if os.path.exists(TOKEN_FILE):
+            with open(TOKEN_FILE, "rb") as token:
+                creds = pickle.load(token)
+                print("✅ Novo token carregado com sucesso!")
+        else:
+            raise Exception("❌ Erro: O token não foi gerado corretamente!")
 
     return build("gmail", "v1", credentials=creds)
 
-def read_agent_output(file_path):
-    """Lê o conteúdo do arquivo salvo de um agente."""
-    if os.path.exists(file_path):
-        with open(file_path, "r", encoding="utf-8") as file:
-            return file.read()
-    return "🔹 Nenhum dado encontrado."
-
-@tool("send_health_report_tool")
-def send_health_report_tool(subject: str, recipient: str) -> str:
+@tool("send_email_tool")
+def send_email_tool(subject: str, body_markdown: str) -> str:
     """
     Envia um e-mail formatado usando Gmail API e OAuth2. Converte Markdown para HTML antes do envio.
+    O destinatário do e-mail é obtido automaticamente do Notion.
+
+    Parâmetros:
+    - subject (str): Assunto do email.
+    - body_markdown (str): Conteúdo do email em Markdown.
+
+    Retorna:
+    - Mensagem de sucesso ou erro.
     """
     try:
         service = get_gmail_service()
 
-        # 🔹 Lendo os arquivos salvos dos agentes
-        nutrition_analysis = read_agent_output("data/analyze_nutrition.txt")
-        research_summary = read_agent_output("data/research_supplements.txt")
+        # 🔹 Obtém o email do usuário do Notion
+        user_data = fetch_notion_user_data.run()
+        user_info = json.loads(user_data)
+        recipient = user_info.get("Email", "")
 
-        # 🔹 Criando o corpo do relatório
-        body_markdown = f"""
-        # 🏥 Relatório de Saúde e Suplementação
+        if not recipient or "@" not in recipient:
+            return "❌ Erro: Email do usuário não encontrado no Notion."
 
-        ## 🍏 Análise Nutricional
-        {nutrition_analysis}
+        # 🔹 Converte Markdown para HTML com suporte a títulos
+        body_html = markdown2.markdown(body_markdown, extras=["tables", "fenced-code-blocks"])
 
-        ## 📖 Artigos Científicos
-        {research_summary}
+        # 🔹 Garantir compatibilidade do Gmail (headers e estilos básicos)
+        full_html = f"""
+        <html>
+        <head>
+            <style>
+                h1 {{ font-size: 22px; color: #333; }}
+                h2 {{ font-size: 20px; color: #555; }}
+                h3 {{ font-size: 18px; color: #777; }}
+                p  {{ font-size: 16px; color: #000; }}
+                table {{ border-collapse: collapse; width: 100%; }}
+                th, td {{ border: 1px solid black; padding: 8px; text-align: left; }}
+                th {{ background-color: #f2f2f2; }}
+            </style>
+        </head>
+        <body>
+            {body_html}
+        </body>
+        </html>
         """
-
-        # 🔹 Converte Markdown para HTML
-        body_html = markdown2.markdown(body_markdown)
 
         # 🔹 Criando a mensagem de e-mail
         message = MIMEMultipart()
         message["to"] = recipient
         message["subject"] = subject
-        message.attach(MIMEText(body_html, "html"))
+        message.attach(MIMEText(full_html, "html"))
 
         # 🔹 Converte a mensagem para base64
         raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
@@ -66,7 +93,7 @@ def send_health_report_tool(subject: str, recipient: str) -> str:
         # 🔹 Envia o e-mail via Gmail API
         service.users().messages().send(userId="me", body={"raw": raw_message}).execute()
 
-        return "✅ E-mail enviado com sucesso via OAuth2!"
+        return f"✅ E-mail enviado com sucesso para {recipient}!"
 
     except Exception as e:
         return f"❌ Erro ao enviar e-mail: {str(e)}"
