@@ -1,5 +1,3 @@
-import time
-
 from crewai import Crew, Process
 from health_automation.config.agents import agents
 from health_automation.config.tasks import tasks
