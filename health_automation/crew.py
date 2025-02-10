@@ -5,11 +5,8 @@ from health_automation.llm_setup import groq_setup
 
 
 def create_crew():
-    return Crew(
-        agents=agents,
-        tasks=tasks,
-        process=Process.sequential
-    )
+    return Crew(agents=agents, tasks=tasks, process=Process.sequential)
+
 
 if __name__ == "__main__":
     print("🚀 Starting CrewAI process...\n")

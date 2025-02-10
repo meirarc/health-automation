@@ -8,9 +8,10 @@ import pickle
 import base64
 import json
 from health_automation.tools.notion_tool import fetch_notion_user_data
-from health_automation.tools.generate_gmail_token import generate_token  
+from health_automation.tools.generate_gmail_token import generate_token
 
 TOKEN_FILE = os.path.join("certs", "gmail_token.pickle")
+
 
 def get_gmail_service():
     """Carrega o token OAuth2 e retorna o serviço Gmail API autenticado."""
@@ -33,6 +34,7 @@ def get_gmail_service():
             raise Exception("❌ Erro: O token não foi gerado corretamente!")
 
     return build("gmail", "v1", credentials=creds)
+
 
 @tool("send_email_tool")
 def send_email_tool(subject: str, body_markdown: str) -> str:
@@ -59,7 +61,9 @@ def send_email_tool(subject: str, body_markdown: str) -> str:
             return "❌ Erro: Email do usuário não encontrado no Notion."
 
         # 🔹 Converte Markdown para HTML com suporte a títulos
-        body_html = markdown2.markdown(body_markdown, extras=["tables", "fenced-code-blocks"])
+        body_html = markdown2.markdown(
+            body_markdown, extras=["tables", "fenced-code-blocks"]
+        )
 
         # 🔹 Garantir compatibilidade do Gmail (headers e estilos básicos)
         full_html = f"""
@@ -91,7 +95,9 @@ def send_email_tool(subject: str, body_markdown: str) -> str:
         raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
 
         # 🔹 Envia o e-mail via Gmail API
-        service.users().messages().send(userId="me", body={"raw": raw_message}).execute()
+        service.users().messages().send(
+            userId="me", body={"raw": raw_message}
+        ).execute()
 
         return f"✅ E-mail enviado com sucesso para {recipient}!"
 

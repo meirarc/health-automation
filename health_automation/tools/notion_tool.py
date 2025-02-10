@@ -5,7 +5,7 @@ from health_automation.tools.config_loader import load_credentials
 import os
 
 
-notion_creds = load_credentials(os.path.join("certs","notion.json"))
+notion_creds = load_credentials(os.path.join("certs", "notion.json"))
 
 NOTION_API_KEY = notion_creds["NOTION_API_KEY"]
 NOTION_DATABASE_ID = notion_creds["NOTION_DATABASE_ID"]
@@ -18,8 +18,9 @@ NOTION_BLOCKS_URL = f"https://api.notion.com/v1/blocks/{NOTION_PAGE_ID}/children
 HEADERS = {
     "Authorization": f"Bearer {NOTION_API_KEY}",
     "Content-Type": "application/json",
-    "Notion-Version": "2022-06-28"
+    "Notion-Version": "2022-06-28",
 }
+
 
 @tool("fetch_notion_supplements")
 def fetch_notion_supplements() -> str:
@@ -38,13 +39,21 @@ def fetch_notion_supplements() -> str:
                 if not prop:
                     return "Não informado"
                 if "title" in prop:
-                    return prop["title"][0]["text"]["content"] if prop["title"] else "Não informado"
+                    return (
+                        prop["title"][0]["text"]["content"]
+                        if prop["title"]
+                        else "Não informado"
+                    )
                 if "rich_text" in prop:
-                    return prop["rich_text"][0]["text"]["content"] if prop["rich_text"] else "Não informado"
+                    return (
+                        prop["rich_text"][0]["text"]["content"]
+                        if prop["rich_text"]
+                        else "Não informado"
+                    )
                 if "select" in prop:
                     return prop["select"]["name"] if prop["select"] else "Não informado"
                 return "Não informado"
-            
+
             # 🔹 Captura todos os campos corretamente
             nome = get_text_value(properties.get("Name", {}))
             recomendacao = get_text_value(properties.get("Recommendation", {}))
@@ -53,20 +62,27 @@ def fetch_notion_supplements() -> str:
             multivitaminico = get_text_value(properties.get("Multivitamin", {}))
             marca = get_text_value(properties.get("Brand", {}))
 
-            supplements.append({
-                "name": nome,
-                "recommendation": recomendacao,
-                "benefits": beneficios,
-                "time": horario,
-                "multivitaminic": multivitaminico,
-                "brand": marca
-            })
+            supplements.append(
+                {
+                    "name": nome,
+                    "recommendation": recomendacao,
+                    "benefits": beneficios,
+                    "time": horario,
+                    "multivitaminic": multivitaminico,
+                    "brand": marca,
+                }
+            )
 
-        return json.dumps(supplements, indent=2, ensure_ascii=False) if supplements else json.dumps({"error": "Nenhum suplemento encontrado."})
-    
+        return (
+            json.dumps(supplements, indent=2, ensure_ascii=False)
+            if supplements
+            else json.dumps({"error": "Nenhum suplemento encontrado."})
+        )
+
     except requests.exceptions.RequestException as e:
         return json.dumps({"error": f"Erro ao acessar o Notion API: {str(e)}"})
-    
+
+
 @tool("fetch_notion_user_data")
 def fetch_notion_user_data() -> str:
     """Extrai informações do usuário de uma página do Notion, incluindo email e o corpo da página."""
@@ -75,7 +91,7 @@ def fetch_notion_user_data() -> str:
         response_page = requests.get(NOTION_PAGE_URL, headers=HEADERS)
         response_page.raise_for_status()
         page_data = response_page.json()
-        
+
         properties = page_data.get("properties", {})
         email = properties.get("Email", {}).get("email", "Não encontrado")
 
@@ -90,14 +106,18 @@ def fetch_notion_user_data() -> str:
             rich_text = block.get(block_type, {}).get("rich_text", [])
 
             # Captura títulos, listas e parágrafos
-            block_content = "".join([text.get("text", {}).get("content", "") for text in rich_text])
+            block_content = "".join(
+                [text.get("text", {}).get("content", "") for text in rich_text]
+            )
             if block_type == "heading_1":
                 block_content = f"\n# {block_content}\n"
             elif block_type == "heading_2":
                 block_content = f"\n## {block_content}\n"
             elif block_type == "heading_3":
                 block_content = f"\n### {block_content}\n"
-            elif block_type == "bulleted_list_item" or block_type == "numbered_list_item":
+            elif (
+                block_type == "bulleted_list_item" or block_type == "numbered_list_item"
+            ):
                 block_content = f"- {block_content}"
 
             if block_content:
@@ -106,13 +126,9 @@ def fetch_notion_user_data() -> str:
         body_content = "\n".join(body_text) if body_text else "Sem conteúdo disponível."
 
         # 3️⃣ Retorna os dados estruturados
-        user_info = {
-            "Email": email,
-            "Conteúdo da Página": body_content
-        }
+        user_info = {"Email": email, "Conteúdo da Página": body_content}
 
         return json.dumps(user_info, indent=2, ensure_ascii=False)
 
     except requests.exceptions.RequestException as e:
         return json.dumps({"error": f"Erro ao acessar o Notion API: {str(e)}"})
-

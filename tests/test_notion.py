@@ -1,7 +1,11 @@
 import sys
 import os
 import pytest
-from health_automation.tools.notion_tool import fetch_notion_supplements, fetch_notion_user_data
+from health_automation.tools.notion_tool import (
+    fetch_notion_supplements,
+    fetch_notion_user_data,
+)
+
 
 @pytest.mark.notion
 def test_fetch_notion_supplements():
@@ -12,6 +16,7 @@ def test_fetch_notion_supplements():
     print(resultado)
 
     assert "Erro" not in resultado, "A busca no Notion falhou!"
+
 
 @pytest.mark.notion
 def test_fetch_notion_user_data():
