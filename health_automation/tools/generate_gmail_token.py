@@ -4,8 +4,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 # Caminho do arquivo JSON com credenciais
-CREDENTIALS_FILE = os.path.join("certs", "email.json")
-TOKEN_FILE = os.path.join("certs", "gmail_token.pickle")
+CREDENTIALS_FILE = os.path.join("certs","email.json")
+TOKEN_FILE = os.path.join("certs","gmail_token.pickle")
 
 def generate_token():
     """Autentica e gera um token OAuth2 para envio de e-mails via Gmail."""
