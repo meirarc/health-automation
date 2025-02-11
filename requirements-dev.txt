@@ -1,0 +1,15 @@
+# Dependências para testes
+pytest
+pytest-cov
+
+# Gerenciamento de variáveis de ambiente
+python-dotenv
+
+# Ferramentas de formatação e linting
+black
+isort
+pre-commit
+
+# Logging e debug
+rich
+loguru

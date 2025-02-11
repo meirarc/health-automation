@@ -1,14 +1,7 @@
-
-# General dependencies
-requests
-
-# Google dependencies
-google-auth
-google-auth-oauthlib
-google-auth-httplib2
-google-api-python-client
-markdown2
-
-# CrewAI dependencies
+# Dependências principais para rodar o projeto
 crewai
-crewai[tools]
+crewai-tools
+
+# Outras bibliotecas necessárias
+python-dotenv  # Para carregar variáveis de ambiente
+requests  # Para fazer requisições HTTP
