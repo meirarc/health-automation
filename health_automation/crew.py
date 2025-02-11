@@ -37,7 +37,9 @@ class HealthAutomation:
 
     @task
     def reporting_task(self) -> Task:
-        return Task(config=self.tasks_config["reporting_task"], output_file="report.md")
+        return Task(
+            config=self.tasks_config["reporting_task"], output_file="data/report.md"
+        )
 
     @crew
     def crew(self) -> Crew:
@@ -50,5 +52,4 @@ class HealthAutomation:
             tasks=self.tasks,  # Automatically created by the @task decorator
             process=Process.sequential,
             verbose=True,
-            # process=Process.hierarchical, # In case you wanna use that instead https://docs.crewai.com/how-to/Hierarchical/
         )
