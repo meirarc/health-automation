@@ -1,4 +1,4 @@
-name: Create Checklist Issue 
+name: Create Checklist Issue
 
 on:
   push:

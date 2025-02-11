@@ -1,13 +1,16 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 25.1.0  # Use a versão mais recente disponível
-    hooks:
-      - id: black
 
   - repo: https://github.com/PyCQA/isort
     rev: 6.0.0
     hooks:
       - id: isort
+
+  - repo: https://github.com/psf/black
+    rev: 25.1.0  # Use a versão mais recente disponível
+    hooks:
+      - id: black
+
+
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
